@@ -38,13 +38,14 @@ void showExpenses(TData* data);
 int monthlyExpenses(TData* data, int month);
 int fixedExpenses(TData* data, int month);
 int variableExpenses(TData* data, int month);
+void saveExpensesToFile(TData* data, const char* filename);
 
 int main() {
     TData data = { .elements = 0 };
     TDate date;
     int option, index, month;
 
-    printf("Ingrese el día de hoy: ");
+    printf("\nIngrese el día de hoy: ");
     scanf("%d", &date.day);
     printf("Ingrese el mes de hoy: ");
     scanf("%d", &date.month);
@@ -61,7 +62,8 @@ int main() {
         printf("Gastos mensuales (5)\n");
         printf("Mostrar nombres de gastos fijos y monto gastado en un mes (6)\n");
         printf("Mostrar nombres de gastos variables y monto gastado en un mes (7)\n");
-        printf("Salir (8)\n");
+        printf("Guardar expensas en archivo (8)\n");
+        printf("Salir (9)\n");
         printf("-----------------------------------\n");
         printf("Ingrese una opción: ");
         fflush(stdout); fflush(stdin);
@@ -101,6 +103,9 @@ int main() {
                 printf("Monto gastado en gastos variables en el mes %d: $%d\n", month, variableExpenses(&data, month));
                 break;
             case 8:
+                saveExpensesToFile(&data, "expenses.txt");
+                break;
+            case 9:
                 return 0;
             default: // Opción no válida.
                 printf("Opción inválida.\n");
@@ -124,7 +129,7 @@ void newExpense(TData* data, TDate* date) {
     }
 
     TExpense new_expense;
-    printf("Nombre del nuevo gasto: ");
+    printf("\nNombre del nuevo gasto: ");
     scanf(" %99[^\n]", new_expense.name);
     printf("Descripción del nuevo gasto: ");
     scanf(" %99[^\n]", new_expense.description);
@@ -259,4 +264,25 @@ int variableExpenses(TData* data, int month) {
         }
     }
     return total;
+}
+
+void saveExpensesToFile(TData* data, const char* filename) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error al abrir el archivo para escribir.\n");
+        return;
+    }
+
+    for (int i = 0; i < data->elements; i++) {
+        TExpense expense = data->expenses[i];
+        fprintf(file, "Nombre: %s\n", expense.name);
+        fprintf(file, "Descripción: %s\n", expense.description);
+        fprintf(file, "Fecha: %d/%d/%d\n", expense.date.day, expense.date.month, expense.date.year);
+        fprintf(file, "Monto: $%d\n", expense.amount);
+        fprintf(file, "Tipo: %s\n", expense.type == 1 ? "Fijo" : "Variable");
+        fprintf(file, "-----------------------------------\n");
+    }
+
+    fclose(file);
+    printf("\n¡Expensas guardadas en el archivo %s con éxito!\n", filename);
 }
