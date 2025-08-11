@@ -36,11 +36,13 @@ Notes:
 Ensure you have a C compiler installed.
 
 - macOS (Homebrew):
-	- brew update
-	- brew install gcc
+```sh
+brew update && brew install gcc
+```
 - Linux (Debian/Ubuntu):
-	- sudo apt update
-	- sudo apt install build-essential
+```sh
+sudo apt update && sudo apt install build-essential
+```
 
 Verify the compiler is available:
 
