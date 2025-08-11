@@ -13,6 +13,18 @@ This C program helps you manage expenses with a simple terminal UI. Add, edit, d
 - Variable expenses total: sum of variable expenses for a given month.
 - Save to file / Load from file: persist your data to expenses.txt.
 
+### New enhancements
+
+- Per-expense date input with a shortcut to use “today’s” date captured at startup.
+- Search expenses by keyword (name or description).
+- Show expenses sorted by amount (descending) for quick scanning of top spend.
+- Monthly report showing total, fixed, and variable subtotals in one view.
+- CSV export/import (expenses.csv) for portability and editing in spreadsheets.
+
+Notes:
+- The CSV format is simple; commas inside fields aren’t escaped.
+- CSV import replaces the current in-memory list with the file contents.
+
 ## Improvements
 
 - Indexed display to select items for edit/delete easily.

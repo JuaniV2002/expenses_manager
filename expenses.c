@@ -46,6 +46,14 @@ int variableExpenses(ExpenseData* data, int month);
 void saveExpensesToFile(ExpenseData* data, const char* filename);
 void loadExpensesFromFile(ExpenseData* data, const char* filename);
 ExpenseType inputExpenseType(void);
+bool inputDate(Date* out, const char* promptPrefix, const Date* defaultDate, bool allowDefault);
+void printExpense(const Expense* e, int index);
+void searchExpenses(ExpenseData* data);
+void showExpensesSortedByAmountDesc(ExpenseData* data);
+void monthlyReport(ExpenseData* data);
+void exportExpensesToCSV(ExpenseData* data, const char* filename);
+void importExpensesFromCSV(ExpenseData* data, const char* filename);
+static int ci_strstr(const char* haystack, const char* needle);
 
 int main(void) {
     ExpenseData data = { .elements = 0 };
@@ -70,7 +78,12 @@ int main(void) {
         printf("Show variable expenses and total for a month (7)\n");
         printf("Save expenses to file (8)\n");
         printf("Load expenses from file (9)\n");
-        printf("Exit (10)\n");
+        printf("Search expenses by keyword (10)\n");
+        printf("Show expenses sorted by amount (desc) (11)\n");
+        printf("Monthly report (total/fixed/variable) (12)\n");
+        printf("Export to CSV (13)\n");
+        printf("Import from CSV (14)\n");
+        printf("Exit (15)\n");
         printf("-----------------------------------\n");
         printf("Enter an option: ");
         scanf("%d", &option);
@@ -114,6 +127,21 @@ int main(void) {
                 loadExpensesFromFile(&data, "expenses.txt");
                 break;
             case 10:
+                searchExpenses(&data);
+                break;
+            case 11:
+                showExpensesSortedByAmountDesc(&data);
+                break;
+            case 12:
+                monthlyReport(&data);
+                break;
+            case 13:
+                exportExpensesToCSV(&data, "expenses.csv");
+                break;
+            case 14:
+                importExpensesFromCSV(&data, "expenses.csv");
+                break;
+            case 15:
                 return 0;
             default:
                 printf("Invalid option.\n");
@@ -139,7 +167,7 @@ ExpenseType inputExpenseType(void) {
     return type == 1 ? EXPENSE_FIXED : EXPENSE_VARIABLE;
 }
 
-void newExpense(ExpenseData* data, Date* date) {
+void newExpense(ExpenseData* data, Date* today) {
     if (isFull(data)) {
         printf("The list is full.\n");
         return;
@@ -153,7 +181,10 @@ void newExpense(ExpenseData* data, Date* date) {
     printf("Amount spent: ");
     scanf("%d", &new_expense.amount);
     new_expense.type = inputExpenseType();
-    new_expense.date = *date;
+    if (!inputDate(&new_expense.date, "Expense date", today, true)) {
+        printf("Invalid date. Aborting add.\n");
+        return;
+    }
 
     int pos = 0;
     if (new_expense.type == EXPENSE_FIXED) {
@@ -191,6 +222,15 @@ void modifyExpense(ExpenseData* data, int index) {
     printf("New expense amount: ");
     scanf("%d", &expense->amount);
     expense->type = inputExpenseType();
+    char ch;
+    printf("Change date? (y/n): ");
+    scanf(" %c", &ch);
+    if (ch == 'y' || ch == 'Y') {
+        Date current = expense->date;
+        if (!inputDate(&expense->date, "New expense date", &current, false)) {
+            printf("Invalid date. Keeping previous date.\n");
+        }
+    }
     printf("Expense modified successfully!\n");
 }
 
@@ -225,14 +265,7 @@ void showExpenses(ExpenseData* data) {
     }
     printf("\nExpenses:\n");
     for (int i = 0; i < data->elements; i++) {
-        Expense* e = &data->expenses[i];
-        const char* color = e->type == EXPENSE_FIXED ? BLUE : GREEN;
-        printf("\n%s[%d]%s\n", color, i + 1, RESET);
-        printf("Name: %s\n", e->name);
-        printf("Description: %s\n", e->description);
-        printf("Date: %02d/%02d/%04d\n", e->date.day, e->date.month, e->date.year);
-        printf("Amount: $%d\n", e->amount);
-        printf("Type: %s\n", e->type == EXPENSE_FIXED ? "Fixed" : "Variable");
+        printExpense(&data->expenses[i], i);
     }
 }
 
@@ -305,4 +338,168 @@ void loadExpensesFromFile(ExpenseData* data, const char* filename) {
     }
     fclose(f);
     printf("Expenses loaded from %s\n", filename);
+}
+
+bool inputDate(Date* out, const char* promptPrefix, const Date* defaultDate, bool allowDefault) {
+    if (allowDefault && defaultDate) {
+        printf("Use today's date (%02d/%02d/%04d)? (y/n): ", defaultDate->day, defaultDate->month, defaultDate->year);
+        char c; scanf(" %c", &c);
+        if (c == 'y' || c == 'Y') {
+            *out = *defaultDate;
+            return true;
+        }
+    }
+    int d, m, y;
+    printf("%s - day (1-31): ", promptPrefix);
+    if (scanf("%d", &d) != 1 || d < 1 || d > 31) return false;
+    printf("%s - month (1-12): ", promptPrefix);
+    if (scanf("%d", &m) != 1 || m < 1 || m > 12) return false;
+    printf("%s - year (>=1900): ", promptPrefix);
+    if (scanf("%d", &y) != 1 || y < 1900) return false;
+    out->day = d; out->month = m; out->year = y;
+    return true;
+}
+
+void printExpense(const Expense* e, int index) {
+    const char* color = e->type == EXPENSE_FIXED ? BLUE : GREEN;
+    printf("\n%s[%d]%s\n", color, index + 1, RESET);
+    printf("Name: %s\n", e->name);
+    printf("Description: %s\n", e->description);
+    printf("Date: %02d/%02d/%04d\n", e->date.day, e->date.month, e->date.year);
+    printf("Amount: $%d\n", e->amount);
+    printf("Type: %s\n", e->type == EXPENSE_FIXED ? "Fixed" : "Variable");
+}
+
+static int ci_strstr(const char* haystack, const char* needle) {
+    if (!*needle) return 1;
+    size_t nlen = strlen(needle);
+    for (const char* h = haystack; *h; ++h) {
+        size_t i = 0;
+        while (i < nlen) {
+            char c1 = h[i];
+            char c2 = needle[i];
+            if (!c1) return 0;
+            if (c1 >= 'A' && c1 <= 'Z') c1 = (char)(c1 - 'A' + 'a');
+            if (c2 >= 'A' && c2 <= 'Z') c2 = (char)(c2 - 'A' + 'a');
+            if (c1 != c2) break;
+            i++;
+        }
+        if (i == nlen) return 1;
+    }
+    return 0;
+}
+
+void searchExpenses(ExpenseData* data) {
+    if (isEmpty(data)) {
+        printf("The list is empty.\n");
+        return;
+    }
+    char keyword[LMAX];
+    printf("Enter keyword to search (name/description): ");
+    scanf(" %99[^\n]", keyword);
+    int found = 0;
+    for (int i = 0; i < data->elements; i++) {
+        Expense* e = &data->expenses[i];
+        if (ci_strstr(e->name, keyword) || ci_strstr(e->description, keyword)) {
+            printExpense(e, i);
+            found++;
+        }
+    }
+    if (!found) printf("No expenses matched your search.\n");
+}
+
+static int cmp_amount_desc(const void* a, const void* b) {
+    const Expense* ea = (const Expense*)a;
+    const Expense* eb = (const Expense*)b;
+    if (ea->amount < eb->amount) return 1;
+    if (ea->amount > eb->amount) return -1;
+    return 0;
+}
+
+void showExpensesSortedByAmountDesc(ExpenseData* data) {
+    if (isEmpty(data)) {
+        printf("The list is empty.\n");
+        return;
+    }
+    Expense temp[NMAX];
+    for (int i = 0; i < data->elements; i++) temp[i] = data->expenses[i];
+    qsort(temp, data->elements, sizeof(Expense), cmp_amount_desc);
+    printf("\nExpenses (sorted by amount desc):\n");
+    for (int i = 0; i < data->elements; i++) {
+        printExpense(&temp[i], i);
+    }
+}
+
+void monthlyReport(ExpenseData* data) {
+    if (isEmpty(data)) {
+        printf("The list is empty.\n");
+        return;
+    }
+    int month;
+    printf("Enter a month (1-12): ");
+    scanf("%d", &month);
+    int total = monthlyExpenses(data, month);
+    int fixed = fixedExpenses(data, month);
+    int variable = variableExpenses(data, month);
+    printf("\nMonthly report for month %d\n", month);
+    printf("Total: $%d\n", total);
+    printf("Fixed: $%d\n", fixed);
+    printf("Variable: $%d\n", variable);
+}
+
+void exportExpensesToCSV(ExpenseData* data, const char* filename) {
+    FILE* f = fopen(filename, "w");
+    if (!f) {
+        printf("Error opening CSV file.\n");
+        return;
+    }
+    fprintf(f, "name,description,day,month,year,amount,type\n");
+    for (int i = 0; i < data->elements; i++) {
+        const Expense* e = &data->expenses[i];
+        // Note: simple CSV, commas in text will break
+        fprintf(f, "%s,%s,%d,%d,%d,%d,%s\n",
+                e->name,
+                e->description,
+                e->date.day, e->date.month, e->date.year,
+                e->amount,
+                e->type == EXPENSE_FIXED ? "Fixed" : "Variable");
+    }
+    fclose(f);
+    printf("Expenses exported to %s\n", filename);
+}
+
+void importExpensesFromCSV(ExpenseData* data, const char* filename) {
+    FILE* f = fopen(filename, "r");
+    if (!f) {
+        printf("Could not open CSV file.\n");
+        return;
+    }
+    char line[LMAX * 3];
+    // skip header
+    if (!fgets(line, sizeof(line), f)) {
+        fclose(f);
+        printf("CSV file is empty.\n");
+        return;
+    }
+    int count = 0;
+    while (fgets(line, sizeof(line), f) && count < NMAX) {
+        // naive CSV split by comma
+        char* tokens[7];
+        int t = 0;
+        char* p = strtok(line, ",\n");
+        while (p && t < 7) { tokens[t++] = p; p = strtok(NULL, ",\n"); }
+        if (t < 7) continue;
+        Expense e;
+        strncpy(e.name, tokens[0], LMAX - 1); e.name[LMAX - 1] = '\0';
+        strncpy(e.description, tokens[1], LMAX - 1); e.description[LMAX - 1] = '\0';
+        e.date.day = atoi(tokens[2]);
+        e.date.month = atoi(tokens[3]);
+        e.date.year = atoi(tokens[4]);
+        e.amount = atoi(tokens[5]);
+        if (tokens[6][0] == 'F' || tokens[6][0] == 'f') e.type = EXPENSE_FIXED; else e.type = EXPENSE_VARIABLE;
+        data->expenses[count++] = e;
+    }
+    data->elements = count;
+    fclose(f);
+    printf("Imported %d expenses from %s\n", count, filename);
 }
