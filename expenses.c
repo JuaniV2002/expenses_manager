@@ -60,12 +60,7 @@ int main(void) {
     Date date;
     int option, index, month;
 
-    printf("\nEnter today's day: ");
-    scanf("%d", &date.day);
-    printf("Enter today's month: ");
-    scanf("%d", &date.month);
-    printf("Enter today's year: ");
-    scanf("%d", &date.year);
+    inputDate(&date, "\nEnter today's date", NULL, false);
 
     do {
         printf("\n-----------------------------------\n");
@@ -76,14 +71,12 @@ int main(void) {
         printf("Monthly expenses total (5)\n");
         printf("Show fixed expenses and total for a month (6)\n");
         printf("Show variable expenses and total for a month (7)\n");
-        printf("Save expenses to file (8)\n");
-        printf("Load expenses from file (9)\n");
+        printf("Save expenses to CSV (8)\n");
+        printf("Load expenses from CSV (9)\n");
         printf("Search expenses by keyword (10)\n");
         printf("Show expenses sorted by amount (desc) (11)\n");
         printf("Monthly report (total/fixed/variable) (12)\n");
-        printf("Export to CSV (13)\n");
-        printf("Import from CSV (14)\n");
-        printf("Exit (15)\n");
+        printf("Exit (13)\n");
         printf("-----------------------------------\n");
         printf("Enter an option: ");
         scanf("%d", &option);
@@ -121,10 +114,10 @@ int main(void) {
                 printf("Variable expenses in month %d: $%d\n", month, variableExpenses(&data, month));
                 break;
             case 8:
-                saveExpensesToFile(&data, "expenses.txt");
+                saveExpensesToFile(&data, "expenses.csv");
                 break;
             case 9:
-                loadExpensesFromFile(&data, "expenses.txt");
+                loadExpensesFromFile(&data, "expenses.csv");
                 break;
             case 10:
                 searchExpenses(&data);
@@ -136,12 +129,6 @@ int main(void) {
                 monthlyReport(&data);
                 break;
             case 13:
-                exportExpensesToCSV(&data, "expenses.csv");
-                break;
-            case 14:
-                importExpensesFromCSV(&data, "expenses.csv");
-                break;
-            case 15:
                 return 0;
             default:
                 printf("Invalid option.\n");
@@ -300,44 +287,13 @@ int variableExpenses(ExpenseData* data, int month) {
 }
 
 void saveExpensesToFile(ExpenseData* data, const char* filename) {
-    FILE* f = fopen(filename, "w");
-    if (!f) {
-        printf("Error opening file.\n");
-        return;
-    }
-    for (int i = 0; i < data->elements; i++) {
-        Expense e = data->expenses[i];
-        fprintf(f, "%s\n%s\n%d %d %d\n%d\n%d\n",
-            e.name, e.description,
-            e.date.day, e.date.month, e.date.year,
-            e.amount, e.type);
-    }
-    fclose(f);
-    printf("Expenses saved successfully to %s\n", filename);
+    // Use CSV as the default persistence format now
+    exportExpensesToCSV(data, filename);
 }
 
 void loadExpensesFromFile(ExpenseData* data, const char* filename) {
-    FILE* f = fopen(filename, "r");
-    if (!f) {
-        printf("Could not open file.\n");
-        return;
-    }
-    data->elements = 0;
-    while (!feof(f) && data->elements < NMAX) {
-        Expense* e = &data->expenses[data->elements];
-        if (fgets(e->name, LMAX, f) == NULL) break;
-        e->name[strcspn(e->name, "\n")] = 0;
-        fgets(e->description, LMAX, f);
-        e->description[strcspn(e->description, "\n")] = 0;
-        fscanf(f, "%d %d %d", &e->date.day, &e->date.month, &e->date.year);
-        fscanf(f, "%d", &e->amount);
-        int t;
-        fscanf(f, "%d\n", &t);
-        e->type = (t == 1) ? EXPENSE_FIXED : EXPENSE_VARIABLE;
-        data->elements++;
-    }
-    fclose(f);
-    printf("Expenses loaded from %s\n", filename);
+    // Use CSV as the default persistence format now
+    importExpensesFromCSV(data, filename);
 }
 
 bool inputDate(Date* out, const char* promptPrefix, const Date* defaultDate, bool allowDefault) {
@@ -350,12 +306,11 @@ bool inputDate(Date* out, const char* promptPrefix, const Date* defaultDate, boo
         }
     }
     int d, m, y;
-    printf("%s - day (1-31): ", promptPrefix);
-    if (scanf("%d", &d) != 1 || d < 1 || d > 31) return false;
-    printf("%s - month (1-12): ", promptPrefix);
-    if (scanf("%d", &m) != 1 || m < 1 || m > 12) return false;
-    printf("%s - year (>=1900): ", promptPrefix);
-    if (scanf("%d", &y) != 1 || y < 1900) return false;
+    printf("%s (DD/MM/YYYY): ", promptPrefix);
+    if (scanf(" %d/%d/%d", &d, &m, &y) != 3) return false;
+    if (d < 1 || d > 31) return false;
+    if (m < 1 || m > 12) return false;
+    if (y < 1900) return false;
     out->day = d; out->month = m; out->year = y;
     return true;
 }

@@ -1,0 +1,11 @@
+name,description,day,month,year,amount,type
+Rent,Monthly apartment rent,01,08,2025,1000,Fixed
+Groceries,Weekly supermarket run,03,08,2025,120,Variable
+Internet,Home internet plan,05,08,2025,50,Fixed
+Dining,Saturday dinner out,09,08,2025,45,Variable
+Gym,Monthly gym membership,10,08,2025,35,Fixed
+Transport,Bus and metro card,11,08,2025,25,Variable
+Utilities,Electricity bill,12,08,2025,80,Fixed
+Coffee,Morning coffee,13,08,2025,5,Variable
+Books,Study materials,15,08,2025,40,Variable
+Phone,Mobile plan,18,08,2025,30,Fixed

@@ -11,7 +11,7 @@ This C program helps you manage expenses with a simple terminal UI. Add, edit, d
 - Monthly expenses total: sum of all expenses for a given month.
 - Fixed expenses total: sum of fixed expenses for a given month.
 - Variable expenses total: sum of variable expenses for a given month.
-- Save to file / Load from file: persist your data to expenses.txt.
+- Save to CSV / Load from CSV: persist your data to expenses.csv.
 
 ### New enhancements
 
@@ -19,7 +19,7 @@ This C program helps you manage expenses with a simple terminal UI. Add, edit, d
 - Search expenses by keyword (name or description).
 - Show expenses sorted by amount (descending) for quick scanning of top spend.
 - Monthly report showing total, fixed, and variable subtotals in one view.
-- CSV export/import (expenses.csv) for portability and editing in spreadsheets.
+- CSV export/import (expenses.csv) for portability and editing in spreadsheets. The app now uses CSV by default for Save/Load.
 
 Notes:
 - The CSV format is simple; commas inside fields aren’t escaped.
@@ -59,3 +59,10 @@ gcc -o expenses expenses.c
 ```bash
 ./expenses
 ```
+
+### Starter data
+
+This repo includes a sample expenses.csv with dummy data so you can explore the features immediately. Use:
+
+- Menu option 9 (Load expenses from CSV) to load the sample.
+- Menu option 8 (Save expenses to CSV) to persist your changes.
