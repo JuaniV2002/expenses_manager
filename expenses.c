@@ -1,4 +1,4 @@
-// Expense Manager with Basic Improvements
+// Expense Manager with Basic Improvements (English UI)
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,60 +14,65 @@ typedef struct Date {
     int day;
     int month;
     int year;
-} TDate;
+} Date;
+
+typedef enum {
+    EXPENSE_VARIABLE = 0,
+    EXPENSE_FIXED = 1
+} ExpenseType;
 
 typedef struct Expense {
     char name[LMAX];
     char description[LMAX];
-    TDate date;
+    Date date;
     int amount;
-    int type; // 1 para fijo, 0 para variable
-} TExpense;
+    ExpenseType type; // 1 = Fixed, 0 = Variable
+} Expense;
 
-typedef struct Data {
-    TExpense expenses[NMAX];
+typedef struct ExpenseData {
+    Expense expenses[NMAX];
     int elements;
-} TData;
+} ExpenseData;
 
-bool isEmpty(TData* data);
-bool isFull(TData* data);
-void newExpense(TData* data, TDate* date);
-void modifyExpense(TData* data, int index);
-void deleteExpense(TData* data, int index);
-void showExpenses(TData* data);
-int monthlyExpenses(TData* data, int month);
-int fixedExpenses(TData* data, int month);
-int variableExpenses(TData* data, int month);
-void saveExpensesToFile(TData* data, const char* filename);
-void loadExpensesFromFile(TData* data, const char* filename);
-int inputExpenseType();
+bool isEmpty(ExpenseData* data);
+bool isFull(ExpenseData* data);
+void newExpense(ExpenseData* data, Date* date);
+void modifyExpense(ExpenseData* data, int index);
+void deleteExpense(ExpenseData* data, int index);
+void showExpenses(ExpenseData* data);
+int monthlyExpenses(ExpenseData* data, int month);
+int fixedExpenses(ExpenseData* data, int month);
+int variableExpenses(ExpenseData* data, int month);
+void saveExpensesToFile(ExpenseData* data, const char* filename);
+void loadExpensesFromFile(ExpenseData* data, const char* filename);
+ExpenseType inputExpenseType(void);
 
-int main() {
-    TData data = { .elements = 0 };
-    TDate date;
+int main(void) {
+    ExpenseData data = { .elements = 0 };
+    Date date;
     int option, index, month;
 
-    printf("\nIngrese el d\u00eda de hoy: ");
+    printf("\nEnter today's day: ");
     scanf("%d", &date.day);
-    printf("Ingrese el mes de hoy: ");
+    printf("Enter today's month: ");
     scanf("%d", &date.month);
-    printf("Ingrese el a\u00f1o de hoy: ");
+    printf("Enter today's year: ");
     scanf("%d", &date.year);
 
     do {
         printf("\n-----------------------------------\n");
-        printf("Nuevo gasto (1)\n");
-        printf("Modificar un gasto (2)\n");
-        printf("Eliminar un gasto (3)\n");
-        printf("Mostrar gastos (4)\n");
-        printf("Gastos mensuales (5)\n");
-        printf("Mostrar gastos fijos y monto en un mes (6)\n");
-        printf("Mostrar gastos variables y monto en un mes (7)\n");
-        printf("Guardar gastos en archivo (8)\n");
-        printf("Cargar gastos desde archivo (9)\n");
-        printf("Salir (10)\n");
+        printf("Add expense (1)\n");
+        printf("Modify an expense (2)\n");
+        printf("Delete an expense (3)\n");
+        printf("Show expenses (4)\n");
+        printf("Monthly expenses total (5)\n");
+        printf("Show fixed expenses and total for a month (6)\n");
+        printf("Show variable expenses and total for a month (7)\n");
+        printf("Save expenses to file (8)\n");
+        printf("Load expenses from file (9)\n");
+        printf("Exit (10)\n");
         printf("-----------------------------------\n");
-        printf("Ingrese una opci\u00f3n: ");
+        printf("Enter an option: ");
         scanf("%d", &option);
 
         switch (option) {
@@ -75,12 +80,12 @@ int main() {
                 newExpense(&data, &date);
                 break;
             case 2:
-                printf("Ingrese el \u00edndice del gasto a modificar: ");
+                printf("Enter the index of the expense to modify: ");
                 scanf("%d", &index);
                 modifyExpense(&data, index);
                 break;
             case 3:
-                printf("Ingrese el \u00edndice del gasto a eliminar: ");
+                printf("Enter the index of the expense to delete: ");
                 scanf("%d", &index);
                 deleteExpense(&data, index);
                 break;
@@ -88,19 +93,19 @@ int main() {
                 showExpenses(&data);
                 break;
             case 5:
-                printf("Ingrese un mes (1-12): ");
+                printf("Enter a month (1-12): ");
                 scanf("%d", &month);
-                printf("Total gastado en mes %d: $%d\n", month, monthlyExpenses(&data, month));
+                printf("Total spent in month %d: $%d\n", month, monthlyExpenses(&data, month));
                 break;
             case 6:
-                printf("Ingrese un mes (1-12): ");
+                printf("Enter a month (1-12): ");
                 scanf("%d", &month);
-                printf("Gastos fijos en mes %d: $%d\n", month, fixedExpenses(&data, month));
+                printf("Fixed expenses in month %d: $%d\n", month, fixedExpenses(&data, month));
                 break;
             case 7:
-                printf("Ingrese un mes (1-12): ");
+                printf("Enter a month (1-12): ");
                 scanf("%d", &month);
-                printf("Gastos variables en mes %d: $%d\n", month, variableExpenses(&data, month));
+                printf("Variable expenses in month %d: $%d\n", month, variableExpenses(&data, month));
                 break;
             case 8:
                 saveExpensesToFile(&data, "expenses.txt");
@@ -111,53 +116,53 @@ int main() {
             case 10:
                 return 0;
             default:
-                printf("Opci\u00f3n inv\u00e1lida.\n");
+                printf("Invalid option.\n");
                 break;
         }
     } while (1);
 }
 
-bool isEmpty(TData* data) {
+bool isEmpty(ExpenseData* data) {
     return data->elements == 0;
 }
 
-bool isFull(TData* data) {
+bool isFull(ExpenseData* data) {
     return data->elements == NMAX;
 }
 
-int inputExpenseType() {
+ExpenseType inputExpenseType(void) {
     int type;
     do {
-        printf("Tipo de gasto (1 = Fijo, 0 = Variable): ");
+        printf("Expense type (1 = Fixed, 0 = Variable): ");
         scanf("%d", &type);
     } while (type != 0 && type != 1);
-    return type;
+    return type == 1 ? EXPENSE_FIXED : EXPENSE_VARIABLE;
 }
 
-void newExpense(TData* data, TDate* date) {
+void newExpense(ExpenseData* data, Date* date) {
     if (isFull(data)) {
-        printf("La lista est\u00e1 llena.\n");
+        printf("The list is full.\n");
         return;
     }
 
-    TExpense new_expense;
-    printf("\nNombre del nuevo gasto: ");
+    Expense new_expense;
+    printf("\nName of the new expense: ");
     scanf(" %99[^\n]", new_expense.name);
-    printf("Descripci\u00f3n del nuevo gasto: ");
+    printf("Description of the new expense: ");
     scanf(" %99[^\n]", new_expense.description);
-    printf("Monto gastado: ");
+    printf("Amount spent: ");
     scanf("%d", &new_expense.amount);
     new_expense.type = inputExpenseType();
     new_expense.date = *date;
 
     int pos = 0;
-    if (new_expense.type == 1) {
+    if (new_expense.type == EXPENSE_FIXED) {
         for (int j = data->elements; j > 0; j--) {
             data->expenses[j] = data->expenses[j - 1];
         }
     } else {
         for (pos = 0; pos < data->elements; pos++) {
-            if (data->expenses[pos].type != 1) break;
+            if (data->expenses[pos].type != EXPENSE_FIXED) break;
         }
         for (int j = data->elements; j > pos; j--) {
             data->expenses[j] = data->expenses[j - 1];
@@ -165,73 +170,73 @@ void newExpense(TData* data, TDate* date) {
     }
     data->expenses[pos] = new_expense;
     data->elements++;
-    printf("Nuevo gasto a\u00f1adido con \u00e9xito!\n");
+    printf("New expense added successfully!\n");
 }
 
-void modifyExpense(TData* data, int index) {
+void modifyExpense(ExpenseData* data, int index) {
     if (isEmpty(data)) {
-        printf("La lista est\u00e1 vac\u00eda.\n");
+        printf("The list is empty.\n");
         return;
     }
     if (index < 1 || index > data->elements) {
-        printf("\u00cdndice fuera de rango.\n");
+        printf("Index out of range.\n");
         return;
     }
     index--;
-    TExpense* expense = &data->expenses[index];
-    printf("Nuevo nombre del gasto: ");
+    Expense* expense = &data->expenses[index];
+    printf("New expense name: ");
     scanf(" %99[^\n]", expense->name);
-    printf("Nueva descripci\u00f3n del gasto: ");
+    printf("New expense description: ");
     scanf(" %99[^\n]", expense->description);
-    printf("Nuevo monto del gasto: ");
+    printf("New expense amount: ");
     scanf("%d", &expense->amount);
     expense->type = inputExpenseType();
-    printf("El gasto fue modificado con \u00e9xito!\n");
+    printf("Expense modified successfully!\n");
 }
 
-void deleteExpense(TData* data, int index) {
+void deleteExpense(ExpenseData* data, int index) {
     if (isEmpty(data)) {
-        printf("La lista est\u00e1 vac\u00eda.\n");
+        printf("The list is empty.\n");
         return;
     }
     if (index < 1 || index > data->elements) {
-        printf("\u00cdndice fuera de rango.\n");
+        printf("Index out of range.\n");
         return;
     }
     index--;
-    printf("\u00bfEst\u00e1s seguro que quer\u00e9s eliminar '%s'? (s/n): ", data->expenses[index].name);
+    printf("Are you sure you want to delete '%s'? (y/n): ", data->expenses[index].name);
     char confirm;
     scanf(" %c", &confirm);
-    if (confirm != 's' && confirm != 'S') {
-        printf("Eliminaci\u00f3n cancelada.\n");
+    if (confirm != 'y' && confirm != 'Y') {
+        printf("Deletion canceled.\n");
         return;
     }
     for (int i = index; i < data->elements - 1; i++) {
         data->expenses[i] = data->expenses[i + 1];
     }
     data->elements--;
-    printf("Gasto eliminado con \u00e9xito!\n");
+    printf("Expense deleted successfully!\n");
 }
 
-void showExpenses(TData* data) {
+void showExpenses(ExpenseData* data) {
     if (isEmpty(data)) {
-        printf("La lista est\u00e1 vac\u00eda.\n");
+        printf("The list is empty.\n");
         return;
     }
-    printf("\nGastos:\n");
+    printf("\nExpenses:\n");
     for (int i = 0; i < data->elements; i++) {
-        TExpense* e = &data->expenses[i];
-        const char* color = e->type == 1 ? BLUE : GREEN;
+        Expense* e = &data->expenses[i];
+        const char* color = e->type == EXPENSE_FIXED ? BLUE : GREEN;
         printf("\n%s[%d]%s\n", color, i + 1, RESET);
-        printf("Nombre: %s\n", e->name);
-        printf("Descripci\u00f3n: %s\n", e->description);
-        printf("Fecha: %02d/%02d/%04d\n", e->date.day, e->date.month, e->date.year);
-        printf("Monto: $%d\n", e->amount);
-        printf("Tipo: %s\n", e->type == 1 ? "Fijo" : "Variable");
+        printf("Name: %s\n", e->name);
+        printf("Description: %s\n", e->description);
+        printf("Date: %02d/%02d/%04d\n", e->date.day, e->date.month, e->date.year);
+        printf("Amount: $%d\n", e->amount);
+        printf("Type: %s\n", e->type == EXPENSE_FIXED ? "Fixed" : "Variable");
     }
 }
 
-int monthlyExpenses(TData* data, int month) {
+int monthlyExpenses(ExpenseData* data, int month) {
     int total = 0;
     for (int i = 0; i < data->elements; i++) {
         if (data->expenses[i].date.month == month) {
@@ -241,61 +246,63 @@ int monthlyExpenses(TData* data, int month) {
     return total;
 }
 
-int fixedExpenses(TData* data, int month) {
+int fixedExpenses(ExpenseData* data, int month) {
     int total = 0;
     for (int i = 0; i < data->elements; i++) {
-        if (data->expenses[i].type == 1 && data->expenses[i].date.month == month) {
+        if (data->expenses[i].type == EXPENSE_FIXED && data->expenses[i].date.month == month) {
             total += data->expenses[i].amount;
         }
     }
     return total;
 }
 
-int variableExpenses(TData* data, int month) {
+int variableExpenses(ExpenseData* data, int month) {
     int total = 0;
     for (int i = 0; i < data->elements; i++) {
-        if (data->expenses[i].type == 0 && data->expenses[i].date.month == month) {
+        if (data->expenses[i].type == EXPENSE_VARIABLE && data->expenses[i].date.month == month) {
             total += data->expenses[i].amount;
         }
     }
     return total;
 }
 
-void saveExpensesToFile(TData* data, const char* filename) {
+void saveExpensesToFile(ExpenseData* data, const char* filename) {
     FILE* f = fopen(filename, "w");
     if (!f) {
-        printf("Error al abrir el archivo.\n");
+        printf("Error opening file.\n");
         return;
     }
     for (int i = 0; i < data->elements; i++) {
-        TExpense e = data->expenses[i];
+        Expense e = data->expenses[i];
         fprintf(f, "%s\n%s\n%d %d %d\n%d\n%d\n",
             e.name, e.description,
             e.date.day, e.date.month, e.date.year,
             e.amount, e.type);
     }
     fclose(f);
-    printf("Gastos guardados exitosamente en %s\n", filename);
+    printf("Expenses saved successfully to %s\n", filename);
 }
 
-void loadExpensesFromFile(TData* data, const char* filename) {
+void loadExpensesFromFile(ExpenseData* data, const char* filename) {
     FILE* f = fopen(filename, "r");
     if (!f) {
-        printf("No se pudo abrir el archivo.\n");
+        printf("Could not open file.\n");
         return;
     }
     data->elements = 0;
     while (!feof(f) && data->elements < NMAX) {
-        TExpense* e = &data->expenses[data->elements];
+        Expense* e = &data->expenses[data->elements];
         if (fgets(e->name, LMAX, f) == NULL) break;
         e->name[strcspn(e->name, "\n")] = 0;
         fgets(e->description, LMAX, f);
         e->description[strcspn(e->description, "\n")] = 0;
         fscanf(f, "%d %d %d", &e->date.day, &e->date.month, &e->date.year);
         fscanf(f, "%d", &e->amount);
-        fscanf(f, "%d\n", &e->type);
+        int t;
+        fscanf(f, "%d\n", &t);
+        e->type = (t == 1) ? EXPENSE_FIXED : EXPENSE_VARIABLE;
         data->elements++;
     }
     fclose(f);
-    printf("Gastos cargados desde %s\n", filename);
+    printf("Expenses loaded from %s\n", filename);
 }

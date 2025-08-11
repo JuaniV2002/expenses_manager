@@ -1,54 +1,49 @@
 # Expense Tracker
 
-This **C** program helps you manage your **expenses**, offering a variety of commands to better understand your spendings. It's ideal for personal use, small businesses, or budget-conscious teams.
+This C program helps you manage expenses with a simple terminal UI. Add, edit, delete, list, and persist expenses; also see monthly totals and breakdowns by type.
 
 ## Features
 
-- **_Cargar gasto_ (Register expense):** Add a new expense with description, amount, type, and date.
-- **_Modificar gasto_ (Modify expense):** Modify any field of a selected expense.
-- **_Eliminar gasto_ (Delete expense):** Delete an expense (with confirmation prompt).
-- **_Listar gastos_ (Show expenses):** Display all expenses, showing their type (Fixed/Variable) with color-coded formatting.
-- **_Gastos mensuales_ (Monthly expenses):** Show total expenses for a given month.
-- **_Gastos fijos_ (Fixed costs):** List and sum all fixed expenses for a month.
-- **_Gastos variables_ (Variable costs):** List and sum all variable expenses for a month.
-- **_Guardar expensas en archivo_ (Save expenses to file):** Persist your expenses to a file.
-- **_Cargar expensas desde archivo_ (Load expenses from file):** Load previously saved expenses.
+- Add expense: name, description, amount, type (Fixed/Variable), and date.
+- Modify expense: update any field of a selected expense.
+- Delete expense: with confirmation prompt.
+- Show expenses: color-coded output (Fixed = blue, Variable = green) with indices.
+- Monthly expenses total: sum of all expenses for a given month.
+- Fixed expenses total: sum of fixed expenses for a given month.
+- Variable expenses total: sum of variable expenses for a given month.
+- Save to file / Load from file: persist your data to expenses.txt.
 
 ## Improvements
 
-- ✅ Indexed display: makes it easier to identify expenses when modifying or deleting.
-- ✅ Input validation: ensures only valid types (fixed or variable) are accepted.
-- ✅ Color-coded output: fixed = blue, variable = green.
-- ✅ File persistence with both saving and loading capabilities.
+- Indexed display to select items for edit/delete easily.
+- Basic input validation for expense type.
+- File persistence for saving and loading.
 
-## Getting Started
+## Getting started (macOS/Linux)
 
-To give this program a try on **Linux**:
+Ensure you have a C compiler installed.
 
-```bash
-sudo apt update
-sudo apt install build-essential
-```
-or if you are on mac using homebrew:
-  
-```bash
-brew update
-brew install gcc
-```
+- macOS (Homebrew):
+	- brew update
+	- brew install gcc
+- Linux (Debian/Ubuntu):
+	- sudo apt update
+	- sudo apt install build-essential
+
 Verify the compiler is available:
-  
+
 ```bash
 gcc --version
 ```
 
-## Compile the program:
-  
+### Compile
+
 ```bash
 gcc -o expenses expenses.c
 ```
 
-## Run the program:
-  
+### Run
+
 ```bash
 ./expenses
 ```
